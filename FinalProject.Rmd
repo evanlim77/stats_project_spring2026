@@ -21,7 +21,7 @@ party.raw <- read.csv("./Data/countypres_2000-2024.csv")
 violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
 srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
 
-NC_PWS.raw <- read.csv("./Data/Public_Water_Supply_Water_Sources.csv") # this dataset focuses on NC
+PWS.raw <- read.csv("./Data/SDWA_PUB_WATER_SYSTEMS.csv") 
 ```
 
 # Data cleaning
@@ -32,7 +32,7 @@ party.clean <- party.raw %>%
 
 violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
 violations.clean <- violations.raw %>% 
-    filter(PWSID1 == "NC") %>% #only filtered to NC for now
+   # filter(PWSID1 == "NC") %>% #only filtered to NC for now
   select("PWSID","VIOLATION_CODE") 
 
 rows <- srf.raw[4,]
@@ -44,12 +44,25 @@ srf.clean <- srf %>%
   select("State","Amount of New Funding")
 srf.clean$`Amount of New Funding` <- as.numeric(gsub("\\,","",srf.clean$`Amount of New Funding`))
 
+PWS.clean <- PWS.raw %>% 
+  select("PWSID", "PWS_NAME","EPA_REGION","STATE_CODE") %>% 
+  na.omit()
 
+violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID"))
 ```
 
 # Initial figure creation
 ```{r}
 ggplot(srf.clean, aes(x = `Amount of New Funding`))+
   geom_histogram()
+
+ggplot(violation.pws,aes(x = STATE_CODE))+
+  geom_bar()+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 0.8))+
+  labs(title = "Number of drinking water violations across US in 2024",
+       x = "State",
+       y = "Count")
+  
 ```
 
