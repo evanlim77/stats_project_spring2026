@@ -16,11 +16,23 @@ library(dplyr)
 
 # Read relevant datasets
 ```{r}
-
+here()
+party.raw <- read.csv("./Data/countypres_2000-2024.csv")
+violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
 ```
 
 # Data cleaning
 ```{r}
+party.clean <- party.raw %>% 
+  filter(year %in% c(2020, 2021, 2022, 2023, 2024)) %>% 
+  select("state","county_name","year","state_po","county_fips","party")
+
+#violations.raw$PWSID <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
+violations.clean <- violations.raw %>% 
+  select("PWSID","VIOLATION_CODE") %>% 
+  group_by(PWSID) %>% 
+  summarise(Count = n()) %>% 
+  ungroup()
 
 ```
 
