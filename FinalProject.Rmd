@@ -1,0 +1,54 @@
+---
+title: "FinalProject"
+author: "Yike Ma, Sean Burke, Evan Lim"
+date: "2026-03-17"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Set Up
+```{r}
+library(here)
+library(tidyverse)
+library(dplyr)
+```
+
+# Read relevant datasets
+```{r}
+here()
+party.raw <- read.csv("./Data/countypres_2000-2024.csv")
+violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
+srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
+
+```
+
+# Data cleaning
+```{r}
+party.clean <- party.raw %>% 
+  filter(year %in% c(2020, 2021, 2022, 2023, 2024)) %>% 
+  select("state","county_name","year","state_po","county_fips","party")
+
+violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
+violations.clean <- violations.raw %>% 
+    filter(PWSID1 == "NC") %>% 
+  select("PWSID","VIOLATION_CODE") 
+
+rows <- srf.raw[4,]
+rows <- as.vector(rows)
+srf <- srf.raw[-c(1:4),]
+colnames(srf) <- rows
+
+srf.clean <- srf %>% 
+  select("State","Amount of New Funding")
+srf.clean$`Amount of New Funding` <- as.numeric(gsub("\\,","",srf.clean$`Amount of New Funding`))
+
+
+```
+
+# Initial figure creation
+```{r}
+ggplot(srf.clean, aes(x = `Amount of New Funding`))+
+  geom_histogram()
+```
+
