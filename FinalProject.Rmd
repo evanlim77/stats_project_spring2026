@@ -20,7 +20,8 @@ here()
 party.raw <- read.csv("./Data/countypres_2000-2024.csv")
 violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
 srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
-NC_PWS.raw <- read.csv("./Data/Public_Water_Supply_Water_Sources.csv")
+
+NC_PWS.raw <- read.csv("./Data/Public_Water_Supply_Water_Sources.csv") # this dataset focuses on NC
 ```
 
 # Data cleaning
@@ -31,7 +32,7 @@ party.clean <- party.raw %>%
 
 violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
 violations.clean <- violations.raw %>% 
-    filter(PWSID1 == "NC") %>% 
+    filter(PWSID1 == "NC") %>% #only filtered to NC for now
   select("PWSID","VIOLATION_CODE") 
 
 rows <- srf.raw[4,]
