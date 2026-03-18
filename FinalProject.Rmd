@@ -22,6 +22,7 @@ violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
 srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
 
 PWS.raw <- read.csv("./SDWA_PUB_WATER_SYSTEMS.csv") 
+
 ```
 
 # Data cleaning
