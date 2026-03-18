@@ -22,6 +22,7 @@ violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
 srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
 
 PWS.raw <- read.csv("./SDWA_PUB_WATER_SYSTEMS.csv") 
+
 ```
 
 # Data cleaning
@@ -49,6 +50,8 @@ PWS.clean <- PWS.raw %>%
   na.omit()
 
 violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID"))
+
+summary(violation.pws)
 ```
 
 # Initial figure creation
@@ -56,12 +59,12 @@ violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID")
 ggplot(srf.clean, aes(x = `Amount of New Funding`))+
   geom_histogram()
 
-ggplot(violation.pws,aes(x = STATE_CODE))+
+ggplot(violation.pws,aes(as.factor(x = EPA_REGION)))+
   geom_bar()+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 60, hjust = 0.8))+
+  #theme(axis.text.x = element_text(angle = 60, hjust = 0.8))+
   labs(title = "Number of drinking water violations across US in 2024",
-       x = "State",
+       x = "EPA Region",
        y = "Count")
   
 ```
