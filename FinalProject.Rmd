@@ -41,7 +41,7 @@ party.clean <- party.raw %>%
 violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
 violations.clean <- violations.raw %>% 
    # filter(PWSID1 == "NC") %>% #only filtered to NC for now
-  select("PWSID","VIOLATION_CODE") 
+  select("PWSID","VIOLATION_CODE","PWSID1") 
 
 rows <- srf.raw[4,]
 rows <- as.vector(rows)
@@ -57,8 +57,11 @@ PWS.clean <- PWS.raw %>%
 
 violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID"))
 
-violation.pws <- drop_na(violation.pws)
 
+
+violation.pws <- violation.pws %>%
+   mutate(across(c(STATE_CODE, PWSID1), ~na_if(., "")))
+violation.pws <- drop_na(violation.pws)
 
 #SRF Amount 2015-2025
 srfcolnames <- c("State", "Amount")
@@ -119,7 +122,7 @@ violation_state <- ggplot(violation.pws,aes(as.factor(x = STATE_CODE)))+
        y = "Count")
 violation_state
 ggsave(violation_state,
-       filename = "FinalProj_Fig2.jpg",
+       filename = "MaYBurkeSLimEFig2.jpg",
        height = 15,
        width = 40,
        units = "cm")
@@ -142,7 +145,7 @@ state_amt <-  ggplot(srf_data_2015to2025,
        title = "Drinking Water State Revolving Funds Assistance provided from 2015 - 2025 by State")
 
 ggsave(state_amt,
-       filename = "FinalProj_Fig1.jpg",
+       filename = "MaYBurkeSLimEFig2.jpg",
        height = 15,
        width = 40,
        units = "cm")
