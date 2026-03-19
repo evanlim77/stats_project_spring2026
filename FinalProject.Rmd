@@ -138,8 +138,8 @@ state_amt <-  ggplot(srf_data_2015to2025,
 
 ggsave(state_amt,
        filename = "FinalProj_Fig1.jpg",
-       height = 12,
-       width = 25,
+       height = 15,
+       width = 40,
        units = "cm")
 ```
 
