@@ -145,7 +145,7 @@ state_amt <-  ggplot(srf_data_2015to2025,
        title = "Drinking Water State Revolving Funds Assistance provided from 2015 - 2025 by State")
 
 ggsave(state_amt,
-       filename = "MaYBurkeSLimEFig2.jpg",
+       filename = "MaYBurkeSLimEFig1.jpg",
        height = 15,
        width = 40,
        units = "cm")
