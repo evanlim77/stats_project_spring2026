@@ -23,6 +23,13 @@ srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
 
 PWS.raw <- read.csv("./SDWA_PUB_WATER_SYSTEMS.csv") 
 
+filefolder <- here('Data')
+
+srf_files <- dir(filefolder, pattern = "srf_state_*.*", full.names = TRUE)
+
+srf_data_2015to2025 <- srf_files %>% 
+  map(read_csv) %>% 
+  bind_rows()
 ```
 
 # Data cleaning
@@ -52,6 +59,50 @@ PWS.clean <- PWS.raw %>%
 violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID"))
 
 summary(violation.pws)
+
+#SRF Amount 2015-2025
+srfcolnames <- c("State", "Amount")
+colnames(srf_data_2015to2025) <- srfcolnames
+
+srf_data_2015to2025 <- srf_data_2015to2025 %>% 
+  group_by(State) %>% 
+  summarize(total = sum(Amount))
+
+colnames(srf_data_2015to2025) <- srfcolnames
+
+srf_data_2015to2025 <- srf_data_2015to2025 %>% 
+  mutate(Amount.mil = Amount/1000000)
+
+# EPA regions
+srf_data_2015to2025 <- srf_data_2015to2025 %>% 
+  mutate(EPA.region = case_when(State %in% c("Connecticut", "Maine", 
+                                             "Massachusetts", "New Hampshire", 
+                                             "Rhode Island", "Vermont") ~ "Region 1",
+                                State %in% c("New Jersey", "New York", 
+                                             "Puerto Rico") ~ "Region 2",
+                                State %in% c("Delaware", "Washington DC", 
+                                             "Maryland", "Pennsylvania", 
+                                             "Virginia", "West Virginia") ~ "Region 3",
+                                State %in% c("Alabama", "Florida", "Georgia", 
+                                             "Kentucky", "Mississippi", 
+                                             "North Carolina", "South Carolina", 
+                                             "Tennessee") ~ "Region 4",
+                                State %in% c("Illinois", "Indiana", 
+                                             "Michigan", "Minnesota", 
+                                             "Ohio", "Wisconsin") ~ "Region 5",
+                                State %in% c("Arkansas", "Louisiana", 
+                                             "New Mexico", "Oklahoma", 
+                                             "Texas") ~ "Region 6",
+                                State %in% c("Iowa", "Kansas", 
+                                             "Missouri", "Nebraska") ~ "Region 7",
+                                State %in% c("Colorado", "Montana", 
+                                             "North Dakota", "South Dakota", 
+                                             "Utah", "Wyoming") ~ "Region 8",
+                                State %in% c("Arizona", "California", 
+                                             "Hawaii", "Nevada") ~ "Region 9",
+                                State %in% c("Alaska", "Idaho", 
+                                             "Oregon", "Washington") ~ "Region 10"))
+
 ```
 
 # Initial figure creation
@@ -67,5 +118,28 @@ ggplot(violation.pws,aes(as.factor(x = EPA_REGION)))+
        x = "EPA Region",
        y = "Count")
   
+```
+
+```{r}
+EPAregion_amt <- ggplot(srf_data_2015to2025, 
+                        aes(x = EPA.region, 
+                            y = Amount.mil)) +
+  geom_bar(stat = "identity") +
+  theme_bw()
+  
+state_amt <-  ggplot(srf_data_2015to2025, 
+                        aes(x = State, 
+                            y = Amount.mil)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  labs(y = "Amount (in millions USD)",
+       title = "Drinking Water State Revolving Funds Assistance provided from 2015 - 2025 by State")
+
+ggsave(state_amt,
+       filename = "FinalProj_Fig1.jpg",
+       height = 12,
+       width = 25,
+       units = "cm")
 ```
 
