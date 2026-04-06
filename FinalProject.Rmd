@@ -64,12 +64,15 @@ srf.clean <- srf %>%
 srf.clean$`Amount of New Funding` <- as.numeric(gsub("\\,","",srf.clean$`Amount of New Funding`))
 
 PWS.clean <- PWS.raw %>% 
-  select("PWSID", "PWS_NAME","EPA_REGION","STATE_CODE") %>% 
-  na.omit()
+  select("PWSID", "PWS_NAME","EPA_REGION","STATE_CODE")
 
 violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID"))
 
-summary(violation.pws)
+
+
+violation.pws <- violation.pws %>%
+   mutate(across(c(STATE_CODE, PWSID1), ~na_if(., "")))
+violation.pws <- drop_na(violation.pws)
 
 #SRF Amount 2015-2025
 srfcolnames <- c("State", "Amount")
@@ -142,17 +145,23 @@ srf_data_2015to2025 <- srf_data_2015to2025 %>%
 
 # Initial figure creation
 ```{r}
-ggplot(srf.clean, aes(x = `Amount of New Funding`))+
-  geom_histogram()
+#ggplot(srf.clean, aes(x = `Amount of New Funding`))+
+ # geom_histogram()
 
-ggplot(violation.pws,aes(as.factor(x = EPA_REGION)))+
+violation_state <- ggplot(violation.pws,aes(as.factor(x = STATE_CODE)))+
   geom_bar()+
   theme_bw()+
-  #theme(axis.text.x = element_text(angle = 60, hjust = 0.8))+
-  labs(title = "Number of drinking water violations across US in 2024",
-       x = "EPA Region",
+  theme(axis.text.x = element_text(angle = 60, hjust = 0.8))+
+  labs(title = "Drinking Water Violations in 2025 by State",
+       x = "State",
        y = "Count")
   
+violation_state
+ggsave(violation_state,
+       filename = "MaYBurkeSLimEFig2.jpg",
+       height = 15,
+       width = 40,
+       units = "cm")
 ```
 
 ```{r}
