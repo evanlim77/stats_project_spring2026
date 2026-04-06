@@ -30,6 +30,17 @@ srf_files <- dir(filefolder, pattern = "srf_state_*.*", full.names = TRUE)
 srf_data_2015to2025 <- srf_files %>% 
   map(read_csv) %>% 
   bind_rows()
+
+srf_2021 <- read.csv(here("./Data/srf_state_2021.csv"))
+srf_2022 <- read.csv(here("./Data/srf_state_2022.csv"))
+srf_2023 <- read.csv(here("./Data/srf_state_2023.csv"))
+srf_2024 <- read.csv(here("./Data/srf_state_2024.csv"))
+srf_2025 <- read.csv(here("./Data/srf_state_2025.csv"))
+
+srf_data_2021to2025 <- bind_rows(list(srf_2021, srf_2022, srf_2023, srf_2024, srf_2025))
+
+srf_data_2023to2025 <- bind_rows(list(srf_2023, srf_2024, srf_2025))
+
 ```
 
 # Data cleaning
@@ -71,6 +82,30 @@ srf_data_2015to2025 <- srf_data_2015to2025 %>%
 colnames(srf_data_2015to2025) <- srfcolnames
 
 srf_data_2015to2025 <- srf_data_2015to2025 %>% 
+  mutate(Amount.mil = Amount/1000000)
+
+#SRF Amount 2021-2025
+colnames(srf_data_2021to2025) <- srfcolnames
+
+srf_data_2021to2025 <- srf_data_2021to2025 %>% 
+  group_by(State) %>% 
+  summarize(total = sum(Amount))
+
+colnames(srf_data_2021to2025) <- srfcolnames
+
+srf_data_2021to2025 <- srf_data_2021to2025 %>% 
+  mutate(Amount.mil = Amount/1000000)
+
+#SRF Amount 2021-2025
+colnames(srf_data_2023to2025) <- srfcolnames
+
+srf_data_2023to2025 <- srf_data_2023to2025 %>% 
+  group_by(State) %>% 
+  summarize(total = sum(Amount))
+
+colnames(srf_data_2023to2025) <- srfcolnames
+
+srf_data_2023to2025 <- srf_data_2023to2025 %>% 
   mutate(Amount.mil = Amount/1000000)
 
 # EPA regions
