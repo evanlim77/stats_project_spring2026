@@ -53,6 +53,7 @@ violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digi
 violations.clean <- violations.raw %>% 
    # filter(PWSID1 == "NC") %>% #only filtered to NC for now
   select("PWSID","VIOLATION_CODE") 
+  select("PWSID","VIOLATION_CODE","PWSID1") 
 
 rows <- srf.raw[4,]
 rows <- as.vector(rows)
@@ -155,7 +156,6 @@ violation_state <- ggplot(violation.pws,aes(as.factor(x = STATE_CODE)))+
   labs(title = "Drinking Water Violations in 2025 by State",
        x = "State",
        y = "Count")
-  
 violation_state
 ggsave(violation_state,
        filename = "MaYBurkeSLimEFig2.jpg",
@@ -181,7 +181,7 @@ state_amt <-  ggplot(srf_data_2015to2025,
        title = "Drinking Water State Revolving Funds Assistance provided from 2015 - 2025 by State")
 
 ggsave(state_amt,
-       filename = "FinalProj_Fig1.jpg",
+       filename = "MaYBurkeSLimEFig1.jpg",
        height = 15,
        width = 40,
        units = "cm")
