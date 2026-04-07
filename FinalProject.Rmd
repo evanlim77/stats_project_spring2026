@@ -143,6 +143,40 @@ srf_data_2015to2025 <- srf_data_2015to2025 %>%
 
 ```
 
+
+```{r}
+##Data preparing for the population dataset
+
+pop1 <- read.csv("./Data/2010_2020pop.csv")
+colnames(pop1 ) <- pop1[3,]
+pop1 <- pop1[-c(1:8),]
+pop1<- pop1[,-c(2:7)]
+colnames(pop1) <- c("State","Y2015","Y2016","Y2017","Y2018","Y2019","Y2020")
+pop1 <- pop1[-c(52:59),]
+
+pop1$State <- gsub('\\.', '', pop1$State)
+pop1$Y2015 <- as.numeric(gsub("\\,","",pop1$Y2015))
+pop1$Y2016 <- as.numeric(gsub("\\,","",pop1$Y2016))
+pop1$Y2017 <- as.numeric(gsub("\\,","",pop1$Y2017))
+pop1$Y2018 <- as.numeric(gsub("\\,","",pop1$Y2018))
+pop1$Y2019 <- as.numeric(gsub("\\,","",pop1$Y2019))
+pop1$Y2020 <- as.numeric(gsub("\\,","",pop1$Y2020))
+
+
+pop2 <- read.csv("./Data/2020_2025pop.csv")
+pop2 <- pop2[,-c(1:4,6,7,13:97)]
+colnames(pop2) <- c("State","Y2021","Y2022","Y2023","Y2024","Y2025")
+
+pop <- left_join(pop1,pop2, by = "State")
+pop$avg_2023_2025   <- rowMeans(pop[, c("Y2023","Y2024","Y2025")])
+pop$avg_2020_2025   <- rowMeans(pop[, c("Y2020","Y2021","Y2022","Y2023","Y2024",
+                                        "Y2025")])
+pop$avg_2015_2025   <- rowMeans(pop[, c("Y2015","Y2016","Y2017","Y2018","Y2019",
+                                        "Y2020","Y2021","Y2022","Y2023","Y2024","Y2025")])
+
+```
+
+
 # Initial figure creation
 ```{r}
 #ggplot(srf.clean, aes(x = `Amount of New Funding`))+
