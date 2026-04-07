@@ -421,5 +421,19 @@ ggplot(our_final_data,
            y = Amount3_per_cap)) +
   geom_boxplot() +
   theme_bw()
+
+# Political Affiliation and SRF 1
+ggplot(our_final_data,
+       aes(x = Political.Affiliation,
+           y = Amount1_per_cap)) +
+  geom_boxplot() +
+  theme_bw()
+
+
+```
+
+# Model fitting
+```{r}
+
 ```
 
