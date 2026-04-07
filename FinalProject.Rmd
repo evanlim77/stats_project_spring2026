@@ -187,3 +187,18 @@ ggsave(state_amt,
        units = "cm")
 ```
 
+# Data exploration
+```{r}
+# Visualizing distributions
+
+# SRF spending per state 2015-2025
+
+# SRF spending per state 2021-2025
+
+# SRF spending per state 2023-2025
+
+# SRF spending per state 2025
+
+# Violations 
+```
+
