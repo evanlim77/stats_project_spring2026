@@ -52,7 +52,6 @@ party.clean <- party.raw %>%
 violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
 violations.clean <- violations.raw %>% 
    # filter(PWSID1 == "NC") %>% #only filtered to NC for now
-  select("PWSID","VIOLATION_CODE") 
   select("PWSID","VIOLATION_CODE","PWSID1") 
 
 rows <- srf.raw[4,]
@@ -74,6 +73,38 @@ violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID")
 violation.pws <- violation.pws %>%
    mutate(across(c(STATE_CODE, PWSID1), ~na_if(., "")))
 violation.pws <- drop_na(violation.pws)
+
+# Violations by each state
+violation_totalbystate <- violation.pws %>% 
+  count(STATE_CODE, sort = TRUE) %>% 
+  filter(!(STATE_CODE %in% c("AS", "DC", "MP", "AB", "VI"))) %>% # removing these as we do not have corresponding SRF data
+  mutate(State_Name = case_when(
+    STATE_CODE == "AL" ~ "Alabama", STATE_CODE == "AK" ~ "Alaska",
+    STATE_CODE == "AZ" ~ "Arizona", STATE_CODE == "AR" ~ "Arkansas",
+    STATE_CODE == "CA" ~ "California", STATE_CODE == "CO" ~ "Colorado",
+    STATE_CODE == "CT" ~ "Connecticut", STATE_CODE == "DE" ~ "Delaware",
+    STATE_CODE == "FL" ~ "Florida", STATE_CODE == "GA" ~ "Georgia",
+    STATE_CODE == "HI" ~ "Hawaii", STATE_CODE == "ID" ~ "Idaho",
+    STATE_CODE == "IL" ~ "Illinois", STATE_CODE == "IN" ~ "Indiana",
+    STATE_CODE == "IA" ~ "Iowa", STATE_CODE == "KS" ~ "Kansas",
+    STATE_CODE == "KY" ~ "Kentucky", STATE_CODE == "LA" ~ "Louisiana",
+    STATE_CODE == "ME" ~ "Maine", STATE_CODE == "MD" ~ "Maryland",
+    STATE_CODE == "MA" ~ "Massachusetts", STATE_CODE == "MI" ~ "Michigan",
+    STATE_CODE == "MN" ~ "Minnesota", STATE_CODE == "MS" ~ "Mississippi",
+    STATE_CODE == "MO" ~ "Missouri", STATE_CODE == "MT" ~ "Montana",
+    STATE_CODE == "NE" ~ "Nebraska", STATE_CODE == "NV" ~ "Nevada",
+    STATE_CODE == "NH" ~ "New Hampshire", STATE_CODE == "NJ" ~ "New Jersey",
+    STATE_CODE == "NM" ~ "New Mexico", STATE_CODE == "NY" ~ "New York",
+    STATE_CODE == "NC" ~ "North Carolina", STATE_CODE == "ND" ~ "North Dakota",
+    STATE_CODE == "OH" ~ "Ohio", STATE_CODE == "OK" ~ "Oklahoma",
+    STATE_CODE == "OR" ~ "Oregon", STATE_CODE == "PA" ~ "Pennsylvania",
+    STATE_CODE == "PR" ~ "Puerto Rico", STATE_CODE == "RI" ~ "Rhode Island",
+    STATE_CODE == "SC" ~ "South Carolina", STATE_CODE == "SD" ~ "South Dakota",
+    STATE_CODE == "TN" ~ "Tennessee", STATE_CODE == "TX" ~ "Texas",
+    STATE_CODE == "UT" ~ "Utah", STATE_CODE == "VT" ~ "Vermont",
+    STATE_CODE == "VA" ~ "Virginia", STATE_CODE == "WA" ~ "Washington",
+    STATE_CODE == "WV" ~ "West Virginia", STATE_CODE == "WI" ~ "Wisconsin",
+    STATE_CODE == "WY" ~ "Wyoming", TRUE ~ "Missing"))
 
 #SRF Amount 2015-2025
 srfcolnames <- c("State", "Amount")
@@ -112,37 +143,92 @@ colnames(srf_data_2023to2025) <- srfcolnames
 srf_data_2023to2025 <- srf_data_2023to2025 %>% 
   mutate(Amount.mil = Amount/1000000)
 
+
 # EPA regions
-srf_data_2015to2025 <- srf_data_2015to2025 %>% 
-  mutate(EPA.region = case_when(State %in% c("Connecticut", "Maine", 
-                                             "Massachusetts", "New Hampshire", 
-                                             "Rhode Island", "Vermont") ~ "Region 1",
-                                State %in% c("New Jersey", "New York", 
-                                             "Puerto Rico") ~ "Region 2",
-                                State %in% c("Delaware", "Washington DC", 
-                                             "Maryland", "Pennsylvania", 
-                                             "Virginia", "West Virginia") ~ "Region 3",
-                                State %in% c("Alabama", "Florida", "Georgia", 
-                                             "Kentucky", "Mississippi", 
-                                             "North Carolina", "South Carolina", 
-                                             "Tennessee") ~ "Region 4",
-                                State %in% c("Illinois", "Indiana", 
-                                             "Michigan", "Minnesota", 
-                                             "Ohio", "Wisconsin") ~ "Region 5",
-                                State %in% c("Arkansas", "Louisiana", 
-                                             "New Mexico", "Oklahoma", 
-                                             "Texas") ~ "Region 6",
-                                State %in% c("Iowa", "Kansas", 
-                                             "Missouri", "Nebraska") ~ "Region 7",
-                                State %in% c("Colorado", "Montana", 
-                                             "North Dakota", "South Dakota", 
-                                             "Utah", "Wyoming") ~ "Region 8",
-                                State %in% c("Arizona", "California", 
-                                             "Hawaii", "Nevada") ~ "Region 9",
-                                State %in% c("Alaska", "Idaho", 
-                                             "Oregon", "Washington") ~ "Region 10"))
+#srf_data_2015to2025 <- srf_data_2015to2025 %>% 
+#  mutate(EPA.region = case_when(State %in% c("Connecticut", "Maine", 
+#                                             "Massachusetts", "New Hampshire", 
+#                                            "Rhode Island", "Vermont") ~ "Region 1",
+#                                State %in% c("New Jersey", "New York", 
+#                                             "Puerto Rico") ~ "Region 2",
+#                                State %in% c("Delaware", "Washington DC", 
+#                                             "Maryland", "Pennsylvania", 
+#                                             "Virginia", "West Virginia") ~ "Region 3",
+#                                State %in% c("Alabama", "Florida", "Georgia", 
+#                                             "Kentucky", "Mississippi", 
+#                                             "North Carolina", "South Carolina", 
+#                                             "Tennessee") ~ "Region 4",
+#                                State %in% c("Illinois", "Indiana", 
+#                                             "Michigan", "Minnesota", 
+#                                             "Ohio", "Wisconsin") ~ "Region 5",
+#                                State %in% c("Arkansas", "Louisiana", 
+#                                             "New Mexico", "Oklahoma", 
+#                                             "Texas") ~ "Region 6",
+#                                State %in% c("Iowa", "Kansas", 
+#                                             "Missouri", "Nebraska") ~ "Region 7",
+#                                State %in% c("Colorado", "Montana", 
+#                                             "North Dakota", "South Dakota", 
+#                                            "Utah", "Wyoming") ~ "Region 8",
+#                                State %in% c("Arizona", "California", 
+#                                             "Hawaii", "Nevada") ~ "Region 9",
+#                                State %in% c("Alaska", "Idaho", 
+#                                             "Oregon", "Washington") ~ "Region 10"))
 
 ```
+
+
+```{r}
+##Data preparing for the population dataset
+
+pop1 <- read.csv("./Data/2010_2020pop.csv")
+colnames(pop1 ) <- pop1[3,]
+pop1 <- pop1[-c(1:8),]
+pop1<- pop1[,-c(2:7)]
+colnames(pop1) <- c("State","Y2015","Y2016","Y2017","Y2018","Y2019","Y2020")
+pop1 <- pop1[-c(52:59),]
+
+pop1$State <- gsub('\\.', '', pop1$State)
+pop1$Y2015 <- as.numeric(gsub("\\,","",pop1$Y2015))
+pop1$Y2016 <- as.numeric(gsub("\\,","",pop1$Y2016))
+pop1$Y2017 <- as.numeric(gsub("\\,","",pop1$Y2017))
+pop1$Y2018 <- as.numeric(gsub("\\,","",pop1$Y2018))
+pop1$Y2019 <- as.numeric(gsub("\\,","",pop1$Y2019))
+pop1$Y2020 <- as.numeric(gsub("\\,","",pop1$Y2020))
+
+
+pop2 <- read.csv("./Data/2020_2025pop.csv")
+pop2 <- pop2[,-c(1:4,6,7,13:97)]
+colnames(pop2) <- c("State","Y2021","Y2022","Y2023","Y2024","Y2025")
+
+pop <- left_join(pop1,pop2, by = "State")
+pop$avg_2023_2025   <- rowMeans(pop[, c("Y2023","Y2024","Y2025")])
+pop$avg_2020_2025   <- rowMeans(pop[, c("Y2020","Y2021","Y2022","Y2023","Y2024",
+                                        "Y2025")])
+pop$avg_2015_2025   <- rowMeans(pop[, c("Y2015","Y2016","Y2017","Y2018","Y2019",
+                                        "Y2020","Y2021","Y2022","Y2023","Y2024","Y2025")])
+
+pop$avg_2015_2025 <- as.integer(pop$avg_2015_2025)
+
+pop <- pop %>% 
+  select("State", "avg_2023_2025", "avg_2020_2025", "avg_2015_2025")
+
+```
+
+# Creating final dataframe
+```{r}
+# Updating column names to match
+violationcols <- c("STATE_CODE", "Num_viol", "State")
+colnames(violation_totalbystate) <- violationcols
+
+# Merging
+state_srf_violation <- merge(violation_totalbystate, srf_data_2015to2025, by = "State")
+state_srf_violation_pop <- merge(state_srf_violation, pop, by = "State")
+
+# Transforming by pop / per capita
+state_srf_violation_pop <- state_srf_violation_pop %>% 
+  mutate(Amt_per_cap = )
+```
+
 
 # Initial figure creation
 ```{r}
