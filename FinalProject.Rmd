@@ -119,6 +119,9 @@ colnames(srf_data_2015to2025) <- srfcolnames
 srf_data_2015to2025 <- srf_data_2015to2025 %>% 
   mutate(Amount.mil = Amount/1000000)
 
+srfcolnames15to25 <- c("State", "Amount10", "Amount.mil10")
+colnames(srf_data_2015to2025) <- srfcolnames15to25
+
 #SRF Amount 2021-2025
 colnames(srf_data_2021to2025) <- srfcolnames
 
@@ -130,6 +133,9 @@ colnames(srf_data_2021to2025) <- srfcolnames
 
 srf_data_2021to2025 <- srf_data_2021to2025 %>% 
   mutate(Amount.mil = Amount/1000000)
+
+srfcolnames21to25 <- c("State", "Amount5", "Amount.mil5")
+colnames(srf_data_2021to2025) <- srfcolnames21to25
 
 #SRF Amount 2021-2025
 colnames(srf_data_2023to2025) <- srfcolnames
@@ -143,6 +149,17 @@ colnames(srf_data_2023to2025) <- srfcolnames
 srf_data_2023to2025 <- srf_data_2023to2025 %>% 
   mutate(Amount.mil = Amount/1000000)
 
+srfcolnames23to25 <- c("State", "Amount3", "Amount.mil3")
+colnames(srf_data_2023to2025) <- srfcolnames23to25
+
+#SRF Amount 2025
+colnames(srf_2025) <- srfcolnames
+
+srf_2025 <- srf_2025 %>% 
+  mutate(Amount.mil = Amount / 1000000)
+
+srfcolnames25 <- c("State", "Amount1", "Amount.mil1")
+colnames(srf_2025) <- srfcolnames25
 
 # EPA regions
 #srf_data_2015to2025 <- srf_data_2015to2025 %>% 
@@ -202,31 +219,52 @@ colnames(pop2) <- c("State","Y2021","Y2022","Y2023","Y2024","Y2025")
 
 pop <- left_join(pop1,pop2, by = "State")
 pop$avg_2023_2025   <- rowMeans(pop[, c("Y2023","Y2024","Y2025")])
-pop$avg_2020_2025   <- rowMeans(pop[, c("Y2020","Y2021","Y2022","Y2023","Y2024",
+pop$avg_2021_2025   <- rowMeans(pop[, c("Y2021","Y2022","Y2023","Y2024",
                                         "Y2025")])
 pop$avg_2015_2025   <- rowMeans(pop[, c("Y2015","Y2016","Y2017","Y2018","Y2019",
                                         "Y2020","Y2021","Y2022","Y2023","Y2024","Y2025")])
 
 pop$avg_2015_2025 <- as.integer(pop$avg_2015_2025)
 
-pop <- pop %>% 
-  select("State", "avg_2023_2025", "avg_2020_2025", "avg_2015_2025")
+pop_final <- pop %>% 
+  select("State", "avg_2023_2025", "avg_2021_2025", "avg_2015_2025", "Y2025")
 
 ```
+
+```{r}
+# Data prepping political affiliation data
+political_record <- read.csv(here("./Data/Copy_of_Political_Affiliation.csv"))
+
+political_record_avg_16to24 <- political_record %>% 
+  select("State", "Political.Affiliation")
+```
+
 
 # Creating final dataframe
 ```{r}
 # Updating column names to match
-violationcols <- c("STATE_CODE", "Num_viol", "State")
+violationcols <- c("STATE_CODE", "Num_viol_2025", "State")
 colnames(violation_totalbystate) <- violationcols
 
 # Merging
-state_srf_violation <- merge(violation_totalbystate, srf_data_2015to2025, by = "State")
-state_srf_violation_pop <- merge(state_srf_violation, pop, by = "State")
+all_variables <- violation_totalbystate %>% 
+  left_join(pop_final, by = "State") %>% 
+  left_join(srf_data_2015to2025, by = "State") %>% 
+  left_join(srf_data_2021to2025, by = "State") %>% 
+  left_join(srf_data_2023to2025, by = "State") %>% 
+  left_join(srf_2025, by = "State") %>% 
+  left_join(political_record_avg_16to24, by = "State")
 
 # Transforming by pop / per capita
-state_srf_violation_pop <- state_srf_violation_pop %>% 
-  mutate(Amt_per_cap = )
+our_final_data <- all_variables %>% 
+  mutate(Amount10_per_cap = Amount10/avg_2015_2025) %>% 
+  mutate(Amount5_per_cap = Amount5/avg_2021_2025) %>% 
+  mutate(Amount3_per_cap = Amount3/avg_2023_2025) %>% 
+  mutate(Amount1_per_cap = Amount1/Y2025) %>% 
+  mutate(Violations_per_cap = Num_viol_2025/Y2025) %>% 
+  select("State", "Violations_per_cap", "Amount10_per_cap", "Amount5_per_cap",
+         "Amount3_per_cap", "Amount1_per_cap","Political.Affiliation") %>% 
+  drop_na() # Dropping PR as residents do not vote... maybe we consider running other analysis on just PR?
 ```
 
 
@@ -275,16 +313,113 @@ ggsave(state_amt,
 
 # Data exploration
 ```{r}
-# Visualizing distributions
+# Visualizing distributions of data
+
+#Violations
+ggplot(our_final_data,
+       aes(x = State, y = Violations_per_cap)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 # SRF spending per state 2015-2025
+ggplot(our_final_data,
+       aes(x = State, y = Amount10_per_cap)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 # SRF spending per state 2021-2025
+ggplot(our_final_data,
+       aes(x = State, y = Amount5_per_cap)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 # SRF spending per state 2023-2025
+ggplot(our_final_data,
+       aes(x = State, y = Amount3_per_cap)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 # SRF spending per state 2025
+ggplot(our_final_data,
+       aes(x = State, y = Amount1_per_cap)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-# Violations 
+# Political affiliation
+ggplot(our_final_data,
+       aes(x = Political.Affiliation)) +
+  geom_bar(stat = "count") +
+  theme_bw()
+
+```
+
+```{r}
+# Visualizing relationships
+
+# Violations and SRF Spending 2015 to 2025
+ggplot(our_final_data,
+       aes(x = Amount10_per_cap,
+           y = Violations_per_cap)) +
+  geom_jitter() +
+  theme_bw()
+
+# Violations and SRF Spending 2021 to 2025
+ggplot(our_final_data,
+       aes(x = Amount5_per_cap,
+           y = Violations_per_cap)) +
+  geom_jitter() +
+  theme_bw()
+
+# Violations and SRF Spending 2023 to 2025
+ggplot(our_final_data,
+       aes(x = Amount3_per_cap,
+           y = Violations_per_cap)) +
+  geom_jitter() +
+  theme_bw()
+
+# Violations and SRF Spending 2025
+ggplot(our_final_data,
+       aes(x = Amount1_per_cap,
+           y = Violations_per_cap)) +
+  geom_jitter() +
+  theme_bw()
+
+# Violations and Political Affiliation
+ggplot(our_final_data,
+       aes(x = Political.Affiliation,
+           y = Violations_per_cap)) +
+  geom_boxplot() +
+  theme_bw()
+
+# Political Affiliation and SRF 10
+ggplot(our_final_data,
+       aes(x = Political.Affiliation,
+           y = Amount10_per_cap)) +
+  geom_boxplot() +
+  theme_bw()
+
+# Political Affiliation and SRF 5
+ggplot(our_final_data,
+       aes(x = Political.Affiliation,
+           y = Amount5_per_cap)) +
+  geom_boxplot() +
+  theme_bw()
+
+# Political Affiliation and SRF 3
+ggplot(our_final_data,
+       aes(x = Political.Affiliation,
+           y = Amount3_per_cap)) +
+  geom_boxplot() +
+  theme_bw()
 ```
 
