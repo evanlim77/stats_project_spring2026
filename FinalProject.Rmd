@@ -441,7 +441,7 @@ ggplot(our_final_data,
 
 # Check the correlation between variables
 ```{r}
-# 
+
 ```
 
 
@@ -473,11 +473,11 @@ AIC(mod_poisson3yr, mod_poisson5yr)
 AIC(mod_poisson5yr, mod_poisson10yr) # 10yr has the lowest AIC
 
 
-mod_poissontest <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation + log(Y2025), family = "poisson")
+mod_poissontest <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation + Y2025, family = "poisson")
 summary(mod_poissontest)
 
 # lm
-mod2 <- lm(data = our_final_data, log(Violations_per_cap) ~ Amount1_per_cap + Political.Affiliation + Y2025)
+mod2 <- lm(data = our_final_data, log(Violations_per_cap) ~ Amount1_per_cap + Political.Affiliation)
 summary(mod2)
 plot(mod2)
 
