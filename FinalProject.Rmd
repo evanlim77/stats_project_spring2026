@@ -262,8 +262,9 @@ our_final_data <- all_variables %>%
   mutate(Amount1_per_cap = Amount1/Y2025) %>% 
   mutate(Violations_per_cap = Num_viol_2025/Y2025) %>% 
   select("State", "Violations_per_cap", "Num_viol_2025", "Amount10_per_cap", "Amount5_per_cap",
-         "Amount3_per_cap", "Amount1_per_cap","Political.Affiliation") %>% 
+         "Amount3_per_cap", "Amount1_per_cap","Political.Affiliation", "avg_2023_2025", "avg_2021_2025", "avg_2015_2025", "Y2025") %>% 
   drop_na() # Dropping PR as residents do not vote... maybe we consider running other analysis on just PR?
+#I added population counts to the final data so I could run the new models Kelly suggested in lab - Sean
 ```
 
 
@@ -468,10 +469,35 @@ summary(mod_poisson5yr)
 mod_poisson10yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount10_per_cap + Political.Affiliation, family = "poisson")
 summary(mod_poisson10yr)
 
+#Here is where I have been testing the new models suggested in lab - Sean 
+
+modified_mod_poisson1yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation + Y2025, family = "poisson")
+summary(modified_mod_poisson1yr)
+
+modded_mod_poisson1yr <- glm(data = all_variables, Num_viol_2025 ~ Amount1 + Political.Affiliation + Y2025, family = "poisson")
+summary(modded_mod_poisson1yr)
+
+modified_mod_poisson3yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount3_per_cap + Political.Affiliation + avg_2023_2025, family = "poisson")
+summary(modified_mod_poisson3yr)
+
+modded_mod_poisson3yr <- glm(data = all_variables, Num_viol_2025 ~ Amount3 + Political.Affiliation + avg_2023_2025, family = "poisson")
+summary(modded_mod_poisson3yr)
+
+modified_mod_poisson5yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount5_per_cap + Political.Affiliation + avg_2021_2025, family = "poisson")
+summary(modified_mod_poisson5yr)
+
+modded_mod_poisson5yr <- glm(data = all_variables, Num_viol_2025 ~ Amount5 + Political.Affiliation + avg_2021_2025, family = "poisson")
+summary(modded_mod_poisson5yr)
+
+modified_mod_poisson10yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount10_per_cap + Political.Affiliation + avg_2015_2025, family = "poisson")
+summary(modified_mod_poisson10yr)
+
+modded_mod_poisson10yr <- glm(data = all_variables, Num_viol_2025 ~ Amount10 + Political.Affiliation + avg_2015_2025, family = "poisson")
+summary(modded_mod_poisson10yr)
+
 AIC(mod_poisson1yr, mod_poisson3yr)
 AIC(mod_poisson3yr, mod_poisson5yr)
 AIC(mod_poisson5yr, mod_poisson10yr) # 10yr has the lowest AIC
-
 
 mod_poissontest <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation + Y2025, family = "poisson")
 summary(mod_poissontest)
