@@ -17,7 +17,7 @@ library(dplyr)
 # Read relevant datasets
 ```{r}
 here()
-party.raw <- read.csv("./Data/countypres_2000-2024.csv")
+#party.raw <- read.csv("./Data/countypres_2000-2024.csv")
 violations.raw <- read.csv("./Data/SDWA_PN_VIOLATION_ASSOC.csv")
 srf.raw <- read.csv("./Data/DW Assistance Provided.csv")
 
@@ -45,13 +45,12 @@ srf_data_2023to2025 <- bind_rows(list(srf_2023, srf_2024, srf_2025))
 
 # Data cleaning
 ```{r}
-party.clean <- party.raw %>% 
-  filter(year %in% c(2020, 2021, 2022, 2023, 2024)) %>% 
-  select("state","county_name","year","state_po","county_fips","party")
+#party.clean <- party.raw %>% 
+ # filter(year %in% c(2020, 2021, 2022, 2023, 2024)) %>% 
+  #select("state","county_name","year","state_po","county_fips","party")
 
 violations.raw$PWSID1 <- substring(violations.raw$PWSID,1,2) #The first two digits are country code
 violations.clean <- violations.raw %>% 
-   # filter(PWSID1 == "NC") %>% #only filtered to NC for now
   select("PWSID","VIOLATION_CODE","PWSID1") 
 
 rows <- srf.raw[4,]
@@ -262,7 +261,7 @@ our_final_data <- all_variables %>%
   mutate(Amount3_per_cap = Amount3/avg_2023_2025) %>% 
   mutate(Amount1_per_cap = Amount1/Y2025) %>% 
   mutate(Violations_per_cap = Num_viol_2025/Y2025) %>% 
-  select("State", "Violations_per_cap", "Amount10_per_cap", "Amount5_per_cap",
+  select("State", "Violations_per_cap", "Num_viol_2025", "Amount10_per_cap", "Amount5_per_cap",
          "Amount3_per_cap", "Amount1_per_cap","Political.Affiliation") %>% 
   drop_na() # Dropping PR as residents do not vote... maybe we consider running other analysis on just PR?
 ```
@@ -311,6 +310,7 @@ ggsave(state_amt,
        units = "cm")
 ```
 
+
 # Data exploration
 ```{r}
 # Visualizing distributions of data
@@ -323,6 +323,13 @@ ggplot(our_final_data,
   theme(legend.position = "none") +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
+ggplot(our_final_data,
+       aes(x = log(Violations_per_cap)))+
+  geom_histogram()
+
+ggplot(our_final_data,
+       aes(x = log(Num_viol_2025)))+
+  geom_histogram()
 # SRF spending per state 2015-2025
 ggplot(our_final_data,
        aes(x = State, y = Amount10_per_cap)) +
@@ -432,8 +439,47 @@ ggplot(our_final_data,
 
 ```
 
+# Check the correlation between variables
+```{r}
+# 
+```
+
+
+
 # Model fitting
 ```{r}
+#Poisson regression using counts of violation
+
+#transform the political affiliation (categorical variables) into factors
+our_final_data$Political.Affiliation <- factor(our_final_data$Political.Affiliation, 
+                             level = c("R",
+                                       "D",
+                                       "Other"))
+
+mod_poisson1yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation, family = "poisson")
+summary(mod_poisson1yr)
+
+mod_poisson3yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount3_per_cap + Political.Affiliation, family = "poisson")
+summary(mod_poisson3yr)
+
+mod_poisson5yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount5_per_cap + Political.Affiliation, family = "poisson")
+summary(mod_poisson5yr)
+
+mod_poisson10yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount10_per_cap + Political.Affiliation, family = "poisson")
+summary(mod_poisson10yr)
+
+AIC(mod_poisson1yr, mod_poisson3yr)
+AIC(mod_poisson3yr, mod_poisson5yr)
+AIC(mod_poisson5yr, mod_poisson10yr) # 10yr has the lowest AIC
+
+
+mod_poissontest <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation + log(Y2025), family = "poisson")
+summary(mod_poissontest)
+
+# lm
+mod2 <- lm(data = our_final_data, log(Violations_per_cap) ~ Amount1_per_cap + Political.Affiliation + Y2025)
+summary(mod2)
+plot(mod2)
 
 ```
 
