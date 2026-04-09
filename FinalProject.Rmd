@@ -507,5 +507,8 @@ mod2 <- lm(data = our_final_data, log(Violations_per_cap) ~ Amount1_per_cap + Po
 summary(mod2)
 plot(mod2)
 
+#Clay's suggestions:
+#validate model to see the residuals
+#try modify population into million
 ```
 
