@@ -468,8 +468,10 @@ our_final_data$Political.Affiliation <- factor(our_final_data$Political.Affiliat
                                        "D",
                                        "Other"))
 
-mod_poisson1yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + Political.Affiliation, family = "poisson")
+mod_poisson1yr <- glm(data = all_variables, Num_viol_2025 ~ Amount1 + Political.Affiliation, family = "poisson")
 summary(mod_poisson1yr)
+summary(mod_poisson1yr)$deviance / summary(mod_poisson1yr)$df.residual
+
 
 mod_poisson3yr <- glm(data = our_final_data, Num_viol_2025 ~ Amount3_per_cap + Political.Affiliation, family = "poisson")
 summary(mod_poisson3yr)
@@ -514,12 +516,20 @@ mod_poissontest <- glm(data = our_final_data, Num_viol_2025 ~ Amount1_per_cap + 
 summary(mod_poissontest)
 
 # lm
-mod2 <- lm(data = our_final_data, log(Violations_per_cap) ~ Amount1_per_cap + Political.Affiliation)
-summary(mod2)
-plot(mod2)
+mod1yr <- lm(data = our_final_data, log(Violations_per_cap) ~ log(Amount1_per_cap) + Political.Affiliation)
+summary(mod1yr)
+plot(mod1yr)
 
-#Clay's suggestions:
-#validate model to see the residuals
-#try modify population into million
+mod3yr <- lm(data = our_final_data, log(Violations_per_cap) ~ log(Amount3_per_cap) + Political.Affiliation)
+summary(mod3yr)
+
+mod5yr <- lm(data = our_final_data, log(Violations_per_cap) ~ log(Amount5_per_cap) + Political.Affiliation)
+summary(mod5yr)
+
+mod10yr <- lm(data = our_final_data, log(Violations_per_cap) ~ log(Amount10_per_cap) + Political.Affiliation)
+summary(mod10yr)
+
+AIC(mod1yr, mod3yr, mod5yr, mod10yr)
+
 ```
 
