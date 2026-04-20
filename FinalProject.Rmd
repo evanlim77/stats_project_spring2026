@@ -442,7 +442,18 @@ ggplot(our_final_data,
 
 # Check the correlation between variables
 ```{r}
+anova1 <- aov( Amount1_per_cap ~ Political.Affiliation, data = our_final_data)
+summary(anova1)
 
+cor.test(all_variables$Amount10, all_variables$avg_2015_2025)
+
+ggplot(data = all_variables, aes(x = Amount10, y = avg_2015_2025))+
+  geom_point()+
+  geom_smooth(method = 'lm')+
+  theme_bw()+
+  xlab("Total amount of SRF from 2015-2025")+
+  ylab("Average population from 2015-2025")
+  
 ```
 
 
