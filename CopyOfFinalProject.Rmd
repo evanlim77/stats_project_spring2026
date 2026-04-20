@@ -68,7 +68,6 @@ PWS.clean <- PWS.raw %>%
 violation.pws <- left_join(violations.clean,PWS.clean, by = c("PWSID" = "PWSID"))
 
 
-
 violation.pws <- violation.pws %>%
    mutate(across(c(STATE_CODE, PWSID1), ~na_if(., "")))
 violation.pws <- drop_na(violation.pws)
@@ -160,36 +159,6 @@ srf_2025 <- srf_2025 %>%
 srfcolnames25 <- c("State", "Amount1", "Amount.mil1")
 colnames(srf_2025) <- srfcolnames25
 
-# EPA regions
-#srf_data_2015to2025 <- srf_data_2015to2025 %>% 
-#  mutate(EPA.region = case_when(State %in% c("Connecticut", "Maine", 
-#                                             "Massachusetts", "New Hampshire", 
-#                                            "Rhode Island", "Vermont") ~ "Region 1",
-#                                State %in% c("New Jersey", "New York", 
-#                                             "Puerto Rico") ~ "Region 2",
-#                                State %in% c("Delaware", "Washington DC", 
-#                                             "Maryland", "Pennsylvania", 
-#                                             "Virginia", "West Virginia") ~ "Region 3",
-#                                State %in% c("Alabama", "Florida", "Georgia", 
-#                                             "Kentucky", "Mississippi", 
-#                                             "North Carolina", "South Carolina", 
-#                                             "Tennessee") ~ "Region 4",
-#                                State %in% c("Illinois", "Indiana", 
-#                                             "Michigan", "Minnesota", 
-#                                             "Ohio", "Wisconsin") ~ "Region 5",
-#                                State %in% c("Arkansas", "Louisiana", 
-#                                             "New Mexico", "Oklahoma", 
-#                                             "Texas") ~ "Region 6",
-#                                State %in% c("Iowa", "Kansas", 
-#                                             "Missouri", "Nebraska") ~ "Region 7",
-#                                State %in% c("Colorado", "Montana", 
-#                                             "North Dakota", "South Dakota", 
-#                                            "Utah", "Wyoming") ~ "Region 8",
-#                                State %in% c("Arizona", "California", 
-#                                             "Hawaii", "Nevada") ~ "Region 9",
-#                                State %in% c("Alaska", "Idaho", 
-#                                             "Oregon", "Washington") ~ "Region 10"))
-
 ```
 
 
@@ -267,7 +236,6 @@ our_final_data <- all_variables %>%
 #I added population counts to the final data so I could run the new models Kelly suggested in lab - Sean
 ```
 
-
 # Initial figure creation
 ```{r}
 #ggplot(srf.clean, aes(x = `Amount of New Funding`))+
@@ -289,12 +257,6 @@ ggsave(violation_state,
 ```
 
 ```{r}
-EPAregion_amt <- ggplot(srf_data_2015to2025, 
-                        aes(x = EPA.region, 
-                            y = Amount.mil)) +
-  geom_bar(stat = "identity") +
-  theme_bw()
-  
 state_amt <-  ggplot(srf_data_2015to2025, 
                         aes(x = State, 
                             y = Amount.mil)) +
@@ -439,13 +401,6 @@ ggplot(our_final_data,
 
 
 ```
-
-# Check the correlation between variables
-```{r}
-
-```
-
-
 
 # Model fitting
 ```{r}
